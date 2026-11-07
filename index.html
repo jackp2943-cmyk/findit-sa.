@@ -1,0 +1,170 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FindIt SA | Find Local Services</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f4f6fa;
+  color: #172033;
+}
+header {
+  background: #101b35;
+  color: white;
+  padding: 25px 18px;
+}
+header h1 { margin: 0; font-size: 29px; }
+header p { color: #cbd5e1; }
+main { max-width: 750px; margin: auto; padding: 18px; }
+.search {
+  display: grid;
+  gap: 10px;
+  margin: 15px 0 25px;
+}
+input {
+  width: 100%;
+  padding: 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 9px;
+  font-size: 16px;
+}
+h2 { font-size: 21px; }
+.categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+.categories button, .add-button {
+  border: 0;
+  border-radius: 20px;
+  padding: 11px 15px;
+  background: #e0e7ff;
+  color: #1e3a8a;
+  font-weight: bold;
+  cursor: pointer;
+}
+.categories button.active {
+  background: #1d4ed8;
+  color: white;
+}
+.listing {
+  background: white;
+  border-radius: 12px;
+  padding: 17px;
+  margin: 12px 0;
+  box-shadow: 0 2px 8px #0000000c;
+}
+.listing h3 { margin: 0 0 8px; }
+.tag { color: #64748b; font-size: 13px; }
+.empty { color: #64748b; padding: 15px 0; }
+.add-button {
+  display: inline-block;
+  background: #16a34a;
+  color: white;
+  text-decoration: none;
+  margin-top: 12px;
+}
+footer {
+  text-align: center;
+  padding: 25px;
+  color: #64748b;
+  font-size: 13px;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>📍 FindIt SA</h1>
+  <p>Discover local businesses and services across South Africa.</p>
+</header>
+
+<main>
+  <h2>What are you looking for?</h2>
+
+  <div class="search">
+    <input id="search" placeholder="Search barbers, plumbers, tutors..." oninput="showListings()">
+    <input id="area" placeholder="Enter your area e.g. Germiston" oninput="showListings()">
+  </div>
+
+  <h2>Explore categories</h2>
+  <div class="categories" id="categories">
+    <button class="active" onclick="chooseCategory('All',this)">All</button>
+    <button onclick="chooseCategory('Barber',this)">💈 Barbers</button>
+    <button onclick="chooseCategory('Salon',this)">💇 Salons</button>
+    <button onclick="chooseCategory('Plumber',this)">🔧 Plumbers</button>
+    <button onclick="chooseCategory('Electrician',this)">⚡ Electricians</button>
+    <button onclick="chooseCategory('Tutor',this)">📚 Tutors</button>
+    <button onclick="chooseCategory('Cleaning',this)">🧹 Cleaning</button>
+  </div>
+
+  <h2>Local businesses</h2>
+  <div id="results" class="empty">
+    No businesses have been added yet. Be among the first!
+  </div>
+
+  <h2>Own a business?</h2>
+  <p>Get your business discovered by people in your area.</p>
+  <a class="add-button" href="PASTE_YOUR_GOOGLE_FORM_LINK_HERE">
+    Add your business
+  </a>
+</main>
+
+<footer>
+  © 2026 FindIt SA · Connecting South African communities
+</footer>
+
+<script>
+const businesses = [
+  // Add real businesses here after getting their permission.
+  // Example:
+  // {name:"Example Barber", category:"Barber", area:"Germiston", phone:"27000000000"}
+];
+
+let selectedCategory = "All";
+
+function chooseCategory(category, button) {
+  selectedCategory = category;
+  document.querySelectorAll(".categories button")
+    .forEach(b => b.classList.remove("active"));
+  button.classList.add("active");
+  showListings();
+}
+
+function showListings() {
+  const search = document.getElementById("search").value.toLowerCase();
+  const area = document.getElementById("area").value.toLowerCase();
+  const results = document.getElementById("results");
+
+  const filtered = businesses.filter(b =>
+    (selectedCategory === "All" || b.category === selectedCategory) &&
+    (b.name.toLowerCase().includes(search) ||
+     b.category.toLowerCase().includes(search)) &&
+    b.area.toLowerCase().includes(area)
+  );
+
+  if (!filtered.length) {
+    results.innerHTML = '<p class="empty">No matching businesses yet. Check back soon!</p>';
+    return;
+  }
+
+  results.innerHTML = filtered.map(b => `
+    <div class="listing">
+      <h3>${b.name}</h3>
+      <p>${b.category} · ${b.area}</p>
+      <a href="https://wa.me/${b.phone}" target="_blank">
+        Contact on WhatsApp
+      </a>
+    </div>
+  `).join("");
+}
+
+showListings();
+</script>
+</body>
+</html>
