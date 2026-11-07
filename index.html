@@ -120,13 +120,74 @@ footer {
 </footer>
 
 <script>
-const businesses = [
-  // Add real businesses here after getting their permission.
-  // Example:
-  // {name:"Example Barber", category:"Barber", area:"Germiston", phone:"27000000000"}
-];
+  let businesses = [];
+
+const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT5Y5JSrlRCAQCgNTuZWQzPNc2uz0WX_N542Yhm2s8GHYfmtr7yA1HB3QFEEqURA2GGrKdKEWy1eA3w/pub?gid=0&single=true&output=csv";
 
 let selectedCategory = "All";
+  function parseCSV(text) {
+  const rows = [];
+  let row = [];
+  let cell = "";
+  let quoted = false;
+
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+    const next = text[i + 1];
+
+    if (char === '"' && quoted && next === '"') {
+      cell += '"';
+      i++;
+    } else if (char === '"') {
+      quoted = !quoted;
+    } else if (char === "," && !quoted) {
+      row.push(cell);
+      cell = "";
+    } else if ((char === "\n" || char === "\r") && !quoted) {
+      if (char === "\r" && next === "\n") i++;
+      row.push(cell);
+      rows.push(row);
+      row = [];
+      cell = "";
+    } else {
+      cell += char;
+    }
+  }
+
+  if (cell || row.length) {
+    row.push(cell);
+    rows.push(row);
+  }
+
+  return rows;
+}
+
+async function loadBusinesses() {
+  try {
+    const response = await fetch(SHEET_CSV_URL);
+    if (!response.ok) throw new Error("Could not load listings");
+
+    const csv = await response.text();
+    const rows = parseCSV(csv);
+
+    businesses = rows.slice(1)
+      .filter(row => row[0] && row[0].trim())
+      .map(row => ({
+        name: row[0],
+        category: row[1],
+        area: row[2],
+        phone: row[3],
+        whatsapp: row[4],
+        description: row[5],
+        location: row[6]
+      }));
+
+    showListings();
+  } catch (error) {
+    document.getElementById("results").textContent =
+      "Could not load businesses. Please try again later.";
+  }
+}
 
 function chooseCategory(category, button) {
   selectedCategory = category;
@@ -165,6 +226,7 @@ function showListings() {
 }
 
 showListings();
+  loadBusinesses();
 </script>
 </body>
 </html>
